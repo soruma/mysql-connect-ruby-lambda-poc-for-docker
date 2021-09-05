@@ -1,0 +1,34 @@
+---
+
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  mysql connect ruby poc
+
+Parameters:
+  SecurityGroupId:
+    Type: AWS::EC2::SecurityGroup::Id
+  Subnets:
+    Type: List<AWS::EC2::Subnet::Id>
+
+Resources:
+  MySqlAccessFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      PackageType: Image
+      Timeout: 200
+      Environment:
+        Variables:
+          USE_AWS: true
+      Policies:
+        - VPCAccessPolicy: {}
+        - SSMParameterReadPolicy:
+            ParameterName: 'mysql-connect/*'
+      VpcConfig:
+        SubnetIds: !Ref Subnets
+        SecurityGroupIds:
+          - !Ref SecurityGroupId
+    Metadata:
+      DockerTag: latest
+      DockerContext: .
+      Dockerfile: Dockerfile
